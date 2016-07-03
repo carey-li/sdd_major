@@ -1,0 +1,51 @@
+<style>
+    
+    .page-content-container {
+        overflow: visible !important;
+    }
+
+    .page-content {
+        min-height: 800px !important;
+    }
+
+</style>
+
+<div class="row">
+    <div class="col-md-6 col-sm-6">
+        <div id="symbol-graph"></div>
+    </div>
+    <div class="col-md-6 col-sm-6" style="border-left:1px dotted #898989;height:500px">
+        <h4 id="symbol">Default symbol</h4>
+        <h5 id="name">Default name</h5>
+
+        <p>Last trading price: $<span id="price"></span></p>
+
+        <p>You currently own <span id="owned_shares"></span> stocks.</p>
+
+        <p>You currently have $<span id="cash"></span>.</p>
+
+        <hr>
+
+        <h3>Buy</h3><br>
+
+        <div id="alert_insufficent_funds" class="alert alert-danger" style="display: none;">
+            You do not have enough capital to purchase <span id="insufficent_purchase_amount"></span> stocks.
+        </div>
+
+        <input type="number" id="purchase_amount" class="form-control" placeholder="Number of stocks to purchase"><br>
+
+        <button class="btn btn-primary pull-right" id="submit_button" onclick="ss.routines.stock_purchase()" disabled>Purchase</button> <br><br>
+
+        <hr>
+
+        <h3>Sell</h3>
+
+        <div id="alert_insufficent_stocks" class="alert alert-danger" style="display: none;">
+            You do not own enough stocks to sell <span id="insufficent_sell_amount"></span>.
+        </div>
+
+        <input type="number" id="sell_amount" class="form-control" placeholder="Number of stocks to sell"><br>
+
+        <button class="btn btn-primary pull-right" id="sell_button" onclick="ss.routines.stock_sell()" disabled>Sell</button> <br><br>
+    </div>
+</div>
