@@ -311,8 +311,13 @@ ss.pages = {
         $("#purchase_amount").keyup(function(event){
             var amount = $("#purchase_amount").val();
 
-            if (amount * ss.data.company_data[params.symbol].last_price > ss.data.player_data.cash || amount == 0) {
-                if (amount != 0) {
+            if(event.keyCode == 8){
+                $("#alert_insufficent_funds").hide();
+                $("#submit_button").prop('disabled', false);  
+            }
+
+            if (amount * ss.data.company_data[params.symbol].last_price > ss.data.player_data.cash || amount <= 0) {
+                if (amount > 0) {
                     $("#insufficent_purchase_amount").html(amount);
                     $("#alert_insufficent_funds").show();
                 };
@@ -331,8 +336,13 @@ ss.pages = {
         $("#sell_amount").keyup(function(event){
             var amount = $("#sell_amount").val();
 
-            if (amount > ss.data.player_data.owned_stocks[params.symbol] || amount == 0) {
-                if (amount != 0) {
+            if(event.keyCode == 8){
+                $("#alert_insufficent_stocks").hide();
+                $("#sell_button").prop('disabled', false);         
+            }
+
+            if (amount > ss.data.player_data.owned_stocks[params.symbol] || amount == 0 || amount <= 0) {
+                if (amount > 0) {
                     $("#insufficent_sell_amount").html(amount);
                     $("#alert_insufficent_stocks").show();
                 };
