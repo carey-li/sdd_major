@@ -3,7 +3,6 @@
 if (typeof ss === "undefined") var ss = new Object;
 
 ss.data = {
-    cash: 50000,
     market_condition: M_PEACEFUL,
     player_data: JSON.parse(ss.db.player_data),
     company_data: JSON.parse(ss.db.company_data),
@@ -98,11 +97,11 @@ ss.ticker = {
 
             ss.data.internal.handles[code] = setInterval(function() {
                     
-                Math.random() <= (M_SETTINGS[ss.data.market_condition].boundary + (ss.data.company_data[code].last_price <= 60 ? 0.2 : 0)) ? ss.data.internal.movement = M_UP : ss.data.internal.movement = M_DOWN;
+                Math.random() <= (M_SETTINGS[ss.data.market_condition].boundary + (ss.data.company_data[code].last_price <= 30 ? 0.5 : 0)) ? ss.data.internal.movement = M_UP : ss.data.internal.movement = M_DOWN;
 
                 ss.data.company_data[code].last_price += ss.rng.movement(ss.data.internal.movement);
 
-            }, 10000);
+            }, TIME_PERIOD);
         };
         
     },
@@ -140,7 +139,7 @@ ss.pages = {
                                     shift = series.data.length > 20;
 
                                 chart.series[0].addPoint([Date.now(), ss.routines.getPortfolioValue() + ss.data.player_data.cash], true, shift);
-                            }, 10000);
+                            }, TIME_PERIOD);
                         }
                     }
                 },
@@ -149,7 +148,7 @@ ss.pages = {
                 },
                 xAxis: {
                     type: 'datetime',
-                    tickPixelInterval: 150,
+                    tickPixelInterval: 50,
                     maxZoom: 20 * 1000,
                     labels: {
                         enabled: false
@@ -165,6 +164,7 @@ ss.pages = {
                 },
                 series: [{
                     name: 'Portfolio value',
+                    step: true,
                     data: [[Date.now(), ss.routines.getPortfolioValue() + ss.data.player_data.cash]]
                 }]
             });        
@@ -266,7 +266,7 @@ ss.pages = {
                                     $("#cash").html(ss.data.player_data.cash);
 
                                 chart.series[0].addPoint([Date.now(), ss.data.company_data[params.symbol].last_price], true, shift);
-                            }, 10000);
+                            }, TIME_PERIOD);
                         }
                     }
                 },

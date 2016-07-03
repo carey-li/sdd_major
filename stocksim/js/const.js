@@ -10,6 +10,8 @@
  *  ::: M regards Market constants :::
  */
 
+const TIME_PERIOD = 1500;
+
 const M_DOWN     = -1;
 const M_UP       =  1;
 
