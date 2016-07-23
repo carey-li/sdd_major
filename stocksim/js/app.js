@@ -29,17 +29,22 @@ ss.routines = {
 
         for (var i = Object.keys(stocks).length - 1; i >= 0; i--) {
             
+            // Get the ASX stock symbol
             let code = Object.keys(stocks)[i];
 
+            // Add the last_price of the stock to the counter variable value
             value += ss.data.company_data[code].last_price * stocks[code];
 
         };
 
+        // Return the total value of the owned portfolio
         return value;
     },
     stock_search: function(symbol) {
         if (Object.keys(ss.data.company_data).indexOf(symbol) === -1) {
             alert("Invalid symbol provided.");
+
+            return;
         };
 
         window.location = "?r=stock_view&symbol=" + symbol;
