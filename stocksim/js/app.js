@@ -1,7 +1,5 @@
 "use strict;"
 
-console.info((Date.now()) + " app.js loaded");
-
 if (typeof ss === "undefined") var ss = new Object;
 
 ss.data = {
@@ -59,20 +57,18 @@ ss.routines = {
         if (purchase_amount > ss.db.player_data.cash) {
             alert("Insufficent funds");
         } else {
-            confirm("Purchase " + amount + " shares of " + params.symbol + " for " + purchase_amount + "?", function(confirm) {
-                if (confirm) {
-                    if (typeof ss.data.player_data.owned_stocks[params.symbol] === "undefined") {
-                        ss.data.player_data.owned_stocks[params.symbol] = amount;
-                    } else {
-                        ss.data.player_data.owned_stocks[params.symbol] = Math.floor(ss.data.player_data.owned_stocks[params.symbol]) + Math.floor(amount);
-                    }
+            if (confirm("Purchase " + amount + " shares of " + params.symbol + " for " + purchase_amount + "?")) {
+                if (typeof ss.data.player_data.owned_stocks[params.symbol] === "undefined") {
+                    ss.data.player_data.owned_stocks[params.symbol] = amount;
+                } else {
+                    ss.data.player_data.owned_stocks[params.symbol] = Math.floor(ss.data.player_data.owned_stocks[params.symbol]) + Math.floor(amount);
+                }
 
-                    ss.data.player_data.cash -= purchase_amount;
+                ss.data.player_data.cash -= purchase_amount;
 
-                    $("#owned_shares").html(ss.data.player_data.owned_stocks[params.symbol]);
-                    $("#cash").html(ss.data.player_data.cash);
-                };
-            })
+                $("#owned_shares").html(ss.data.player_data.owned_stocks[params.symbol]);
+                $("#cash").html(ss.data.player_data.cash);
+            }
         }
     },
     stock_sell: function() {
@@ -83,17 +79,14 @@ ss.routines = {
         if (Math.floor(amount) > ss.data.player_data.owned_stocks[params.symbol]) {
             alert("You cannot sell more stocks than you own.")
         } else {
-            confirm("Sell " + amount + " shares of " + params.symbol + " for " + sell_amount + "?", function(confirm) {
-                if (confirm) {
-                    ss.data.player_data.owned_stocks[params.symbol] = Math.floor(ss.data.player_data.owned_stocks[params.symbol]) - Math.floor(amount);
+            if (confirm("Sell " + amount + " shares of " + params.symbol + " for " + sell_amount + "?")) {
+                ss.data.player_data.owned_stocks[params.symbol] = Math.floor(ss.data.player_data.owned_stocks[params.symbol]) - Math.floor(amount);
 
-                    ss.data.player_data.cash += sell_amount;
+                ss.data.player_data.cash += sell_amount;
 
-                    $("#owned_shares").html(ss.data.player_data.owned_stocks[params.symbol]);
-                    $("#cash").html(ss.data.player_data.cash);
-
-                };
-            })
+                $("#owned_shares").html(ss.data.player_data.owned_stocks[params.symbol]);
+                $("#cash").html(ss.data.player_data.cash);
+            }
         }
     }
 }
