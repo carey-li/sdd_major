@@ -1,3 +1,5 @@
+console.info((Date.now()) + " const.js loaded");
+
 /*
  *  ::: Declarations :::
  */

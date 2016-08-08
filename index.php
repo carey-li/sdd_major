@@ -54,6 +54,9 @@
         <link href="assets/layouts/layout5/css/custom.min.css" rel="stylesheet" type="text/css" />
         <!-- END THEME LAYOUT STYLES -->
         <link rel="shortcut icon" href="favicon.ico" /> </head>
+
+        <link rel="stylesheet" href="stocksim/css/vex.css" />
+        <link rel="stylesheet" href="stocksim/css/vex-theme-flat-attack.css" />
     <!-- END HEAD -->
 
     <body class="page-header-fixed page-sidebar-closed-hide-logo">
@@ -112,7 +115,7 @@
                                     if (in_array($route, ["stock_search", "stock_view"])) {
                                         echo "active open selected";
                                     }
-                                ?>">
+                                ?>" onclick="window.location='?r=stock_search'">
                                     <a href="javascript:;" class="text-uppercase">
                                         <i class="icon-book-open"></i> Stock Information </a>
                                     <ul class="dropdown-menu dropdown-menu-fw">
@@ -190,10 +193,18 @@
         <script src="assets/layouts/global/scripts/quick-sidebar.min.js" type="text/javascript"></script>
         <!-- END THEME LAYOUT SCRIPTS -->
 
+        <script src="stocksim/js/vex.combined.min.js"></script>
+
         <script>
             "use strict;"
 
             let commit = "<?= exec('git rev-parse --verify HEAD 2> /dev/null', $output) ?>";
+
+            vex.defaultOptions.className = 'vex-theme-flat-attack';
+
+            alert = function(str) { vex.dialog.alert(str) };
+            confirm = function(str, callback) { vex.dialog.confirm({message: str, callback: callback}) };
+            pause = function() { }
 
             $(window).ready(function() {
                 ss.pages.<?= $route ?>();
