@@ -15,6 +15,10 @@ ss.routines = {
         console.info("StockSim Rev " + commit);
         console.info("Selected mode: " + ss.data.market_condition);
 
+        /*
+         * Call save function whenever the player navigates away from the page.
+         */
+
         $(window).on('beforeunload', function(){
              ss.db.player_data = JSON.stringify(ss.data.player_data);
              ss.db.company_data = JSON.stringify(ss.data.company_data);
@@ -41,6 +45,10 @@ ss.routines = {
         return value;
     },
     stock_search: function(symbol) {
+        /*
+         * Ensure that the provided stock symbol exists within company data
+         */
+
         if (Object.keys(ss.data.company_data).indexOf(symbol) === -1) {
             alert("Invalid symbol provided.");
 
@@ -50,14 +58,24 @@ ss.routines = {
         window.location = "?r=stock_view&symbol=" + symbol;
     },
     stock_purchase: function() {
-        var amount = $("#purchase_amount").val(),
+        var amount = Math.floor($("#purchase_amount").val()),
             params={};window.location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi,function(str,key,value){params[key] = value;}),
             purchase_amount = amount * ss.data.company_data[params.symbol].last_price;
+
+        /*
+         * Validate that the player owns the required amount of capital to purchase the requested shares.
+         */
 
         if (purchase_amount > ss.db.player_data.cash) {
             alert("Insufficent funds");
         } else {
             if (confirm("Purchase " + amount + " shares of " + params.symbol + " for " + purchase_amount + "?")) {
+                
+                /*
+                 * Perform the purchasing action;
+                 * Sum the original owned shares and the purchased amount.
+                 */
+
                 if (typeof ss.data.player_data.owned_stocks[params.symbol] === "undefined") {
                     ss.data.player_data.owned_stocks[params.symbol] = amount;
                 } else {
@@ -66,20 +84,33 @@ ss.routines = {
 
                 ss.data.player_data.cash -= purchase_amount;
 
+                /*
+                 * Update the UI.
+                 */
+
                 $("#owned_shares").html(ss.data.player_data.owned_stocks[params.symbol]);
                 $("#cash").html(ss.data.player_data.cash);
             }
         }
     },
     stock_sell: function() {
-        var amount = $("#sell_amount").val(),
+        var amount = Math.floor($("#sell_amount").val()),
             params={};window.location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi,function(str,key,value){params[key] = value;}),
             sell_amount = amount * ss.data.company_data[params.symbol].last_price;
+
+        /*
+         * Validates the amount of stock that the player owns is enough to sell.
+         */
 
         if (Math.floor(amount) > ss.data.player_data.owned_stocks[params.symbol]) {
             alert("You cannot sell more stocks than you own.")
         } else {
             if (confirm("Sell " + amount + " shares of " + params.symbol + " for " + sell_amount + "?")) {
+                /*
+                 * Performs the selling actions;
+                 * Deducts the share amounts and adds cash.
+                 */
+
                 ss.data.player_data.owned_stocks[params.symbol] = Math.floor(ss.data.player_data.owned_stocks[params.symbol]) - Math.floor(amount);
 
                 ss.data.player_data.cash += sell_amount;
@@ -101,10 +132,14 @@ ss.ticker = {
             let code = Object.keys(ss.data.company_data)[i];
 
             ss.data.internal.handles[code] = setInterval(function() {
-                    
-                Math.random() <= (M_SETTINGS[ss.data.market_condition].boundary + (ss.data.company_data[code].last_price <= 30 ? 0.5 : 0)) ? ss.data.internal.movement = M_UP : ss.data.internal.movement = M_DOWN;
 
-                ss.data.company_data[code].last_price += ss.rng.movement(ss.data.internal.movement);
+                /*
+                 * Decides on the direction the stock moves every TIME_PERIOD.
+                 */
+                    
+                Math.random() <= (M_SETTINGS[ss.data.market_condition].boundary + (ss.data.company_data[code].last_price <= 30 ? 0.5 : 0)) ? move_direction = M_UP : move_direction = M_DOWN;
+
+                ss.data.company_data[code].last_price += ss.rng.movement(move_direction);
 
             }, TIME_PERIOD);
         };
@@ -125,6 +160,10 @@ ss.ticker = {
 
 ss.rng = {
     movement: function(direction) {
+        /*
+         * Returns the movement in stock price based on max and min move constants.
+         */
+
         return direction * (Math.floor(Math.random() * (M_SETTINGS[ss.data.market_condition].max_move - M_SETTINGS[ss.data.market_condition].min_move)) + M_SETTINGS[ss.data.market_condition].max_move);
     }
 }
@@ -132,6 +171,11 @@ ss.rng = {
 ss.pages = {
     portfolio: function() {
         $(document).ready(function() {
+
+            /*
+             * Inits HighChart library for home page.
+             */
+
             ss.data.internal.portfolio_chart = new Highcharts.Chart({
                 chart: {
                     renderTo: 'portfolio-graph',
@@ -139,9 +183,14 @@ ss.pages = {
                     events: {
                         load: function() { 
                             setInterval(function() {
+
+                                /*
+                                 * Updates chart data every TIME_PERIOD.
+                                 */ 
+
                                 let chart = ss.data.internal.portfolio_chart,
                                     series = chart.series[0],
-                                    shift = series.data.length > 20;
+                                    shift = series.data.length > 18;
 
                                 chart.series[0].addPoint([Date.now(), ss.routines.getPortfolioValue() + ss.data.player_data.cash], true, shift);
                             }, TIME_PERIOD);
@@ -156,8 +205,19 @@ ss.pages = {
                     tickPixelInterval: 50,
                     maxZoom: 20 * 1000,
                     labels: {
-                        enabled: false
-                    }
+                        enabled: true,
+                        rotation: -45
+                    },
+                    dateTimeLabelFormats: {
+                        millisecond: '%H:%M:%S.%L',
+                        second: '%H:%M:%S',
+                        minute: '%H:%M',
+                        hour: '%H:%M',
+                        day: '%e. %b',
+                        week: '%e. %b',
+                        month: '%b \'%y',
+                        year: '%Y'
+                    }               
                 },
                 yAxis: {
                     minPadding: 0.2,
@@ -188,6 +248,10 @@ ss.pages = {
         for (var i = Object.keys(stocks).length - 1; i >= 0; i--) {
 
             let code = Object.keys(stocks)[i],
+                /*
+                 * Generates the table HTML markup
+                 */ 
+
                 row = '<tr style="cursor: pointer" class="clickable" data-symbol="' + code + '"><td>' + code + '</td>' + '<td>' + ss.data.company_data[code].name + '</td>' + '<td>' + ss.data.company_data[code].category + '</td><td>' + '$' + ss.data.company_data[code].last_price + '</td><td>' + stocks[code] + '</td><td>' + '$' + ss.data.company_data[code].last_price * stocks[code] + '</td></tr>';
 
             if (stocks[code] == 0) {
@@ -197,6 +261,10 @@ ss.pages = {
             $('#holdings > tbody:last-child').append(row);
 
         }
+
+        /*
+         * Generates static table rows.
+         */
 
         $('#holdings > tbody:last-child').append('<tr><td></td><td>Cash</td><td>Liquid</td><td></td><td></td><td>' + '$' + ss.data.player_data.cash + '</td></tr>');
 
@@ -216,6 +284,10 @@ ss.pages = {
 
         }
 
+        /*
+         * Initiate the Bloodhound searcher.
+         */ 
+
         var stocks = new Bloodhound({
             datumTokenizer: Bloodhound.tokenizers.whitespace,
             queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -234,6 +306,10 @@ ss.pages = {
         });
 
         $("#searcher .typeahead").keyup(function(event){
+            /*
+             * Take only the stock_symbol.
+             */
+
             if(event.keyCode == 13){
                 ss.routines.stock_search($('#search_field').val().substr(0,3))            
             }
@@ -242,6 +318,10 @@ ss.pages = {
     },
     stock_view: function() {
         var params={};window.location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi,function(str,key,value){params[key] = value;});
+
+        /*
+         * Verify that a symbol has been provided and that it is valid.
+         */
 
         if (typeof params.symbol === "undefined") {
             alert("No symbol provided!");
@@ -255,6 +335,10 @@ ss.pages = {
             throw new Error("Invalid symbol provided.");
         }
 
+        /*
+         * Initiate Highwind charts.
+         */
+
         $(document).ready(function() {
             ss.data.internal.stock_chart = new Highcharts.Chart({
                 chart: {
@@ -262,6 +346,11 @@ ss.pages = {
                     defaultSeriesType: 'spline',
                     events: {
                         load: function() { 
+
+                            /*
+                             * Update page chart every TIME_PERIOD.
+                             */
+
                             setInterval(function() {
                                 let chart = ss.data.internal.stock_chart,
                                     series = chart.series[0],
@@ -283,7 +372,7 @@ ss.pages = {
                     tickPixelInterval: 150,
                     maxZoom: 20 * 1000,
                     labels: {
-                        enabled: false
+                        enabled: true
                     }
                 },
                 yAxis: {
@@ -301,6 +390,10 @@ ss.pages = {
             });        
         });
 
+        /*
+         * Update the UI to reflect changes.
+         */ 
+
         $("#symbol").html(params.symbol);
         $("#name").html(ss.data.company_data[params.symbol].name);
         $("#price").html(ss.data.company_data[params.symbol].last_price);
@@ -313,10 +406,18 @@ ss.pages = {
             $("#owned_shares").html(ss.data.player_data.owned_stocks[params.symbol]);
         }
 
+        /*
+         * Handle purchase options and validate that the buyer/seller has enough capital to purchase/sell.
+         */
+
         $("#purchase_amount").keyup(function(event){
             var amount = $("#purchase_amount").val();
 
-            if(event.keyCode == 8){
+            /*
+             * Alert insufficient funds
+             */ 
+
+            if(event.keyCode == 8){ // Keycode 8 -> Backspace
                 $("#alert_insufficent_funds").hide();
                 $("#submit_button").prop('disabled', false);  
             }
@@ -332,7 +433,7 @@ ss.pages = {
                 $("#alert_insufficent_funds").hide();
                 $("#submit_button").prop('disabled', false);
 
-                if(event.keyCode == 13){
+                if(event.keyCode == 13){ // Keycode 13 -> Enter
                     ss.routines.stock_purchase();          
                 }
             }
@@ -340,6 +441,10 @@ ss.pages = {
 
         $("#sell_amount").keyup(function(event){
             var amount = $("#sell_amount").val();
+
+            /*
+             * Alert insufficient funds
+             */ 
 
             if(event.keyCode == 8){
                 $("#alert_insufficent_stocks").hide();
