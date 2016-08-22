@@ -66,7 +66,7 @@ ss.routines = {
          * Validate that the player owns the required amount of capital to purchase the requested shares.
          */
 
-        if (purchase_amount > ss.db.player_data.cash) {
+        if (Math.abs(purchase_amount) > ss.db.player_data.cash || purchase_amount <= 0) {
             alert("Insufficent funds");
         } else {
             if (confirm("Purchase " + amount + " shares of " + params.symbol + " for " + purchase_amount + "?")) {
@@ -102,7 +102,7 @@ ss.routines = {
          * Validates the amount of stock that the player owns is enough to sell.
          */
 
-        if (Math.floor(amount) > ss.data.player_data.owned_stocks[params.symbol]) {
+        if (Math.floor(amount) > ss.data.player_data.owned_stocks[params.symbol] || amount <= 0) {
             alert("You cannot sell more stocks than you own.")
         } else {
             if (confirm("Sell " + amount + " shares of " + params.symbol + " for " + sell_amount + "?")) {
