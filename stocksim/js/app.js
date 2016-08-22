@@ -66,7 +66,7 @@ ss.routines = {
          * Validate that the player owns the required amount of capital to purchase the requested shares.
          */
 
-        if (Math.abs(purchase_amount) > ss.db.player_data.cash || purchase_amount <= 0) {
+        if (Math.abs(purchase_amount) > ss.data.player_data.cash || purchase_amount <= 0) { 
             alert("Insufficent funds");
         } else {
             if (confirm("Purchase " + amount + " shares of " + params.symbol + " for " + purchase_amount + "?")) {
